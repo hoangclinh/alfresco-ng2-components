@@ -15,30 +15,14 @@
  * limitations under the License.
  */
 
-import { Input, AfterViewInit } from '@angular/core';
-import { FormFieldModel } from './widget.model';
-
-
-declare let __moduleName: string;
-declare var componentHandler;
-
-/**
- * Base widget component.
- */
-export class WidgetComponent implements AfterViewInit {
-
-    @Input()
-    field: FormFieldModel;
-
-    hasField() {
-        return this.field ? true : false;
-    }
-
-    ngAfterViewInit() {
-        // workaround for MDL issues with dynamic components
-        if (componentHandler) {
-            componentHandler.upgradeAllRegistered();
-        }
-    }
-
+export class VisibilityFormWidget {
+    public leftFormFieldId : string;
+    public leftRestResponseId : string;
+    public nextCondition: any;
+    public nextConditionOperator: string;
+    public operator: string;
+    public rightFormFieldId: string;
+    public rightRestResponseId:string;
+    public rightType: string;
+    public rightValue: number;
 }

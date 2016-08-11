@@ -15,6 +15,9 @@
  * limitations under the License.
  */
 
+import { VisibilityFormWidget} from './widget-visibility.model';
+import { VisibilityCheckForm} from './widget-visibility.component';
+
 export interface FormFieldMetadata {
     [key: string]: any;
 }
@@ -35,6 +38,7 @@ export class FormWidgetModel {
 
     private _form: FormModel;
     private _json: any;
+    private _visibilityService: VisibilityCheckForm;
 
     get form(): FormModel {
         return this._form;
@@ -44,9 +48,14 @@ export class FormWidgetModel {
         return this._json;
     }
 
+    get visibilityService(): VisibilityCheckForm{
+        return this._visibilityService;
+    }
+
     constructor(form: FormModel, json: any) {
         this._form = form;
         this._json = json;
+        this._visibilityService = new VisibilityCheckForm();
     }
 }
 
@@ -79,6 +88,9 @@ export class FormFieldModel extends FormWidgetModel {
     params: FormFieldMetadata = {};
     hyperlinkUrl: string;
     displayText: string;
+    visibilityCondition: VisibilityFormWidget;
+    isVisible: boolean = true;
+
 
     get value(): any {
         return this._value;
@@ -113,8 +125,12 @@ export class FormFieldModel extends FormWidgetModel {
             this.params = <FormFieldMetadata> json.params || {};
             this.hyperlinkUrl = json.hyperlinkUrl;
             this.displayText = json.displayText;
-
+            this.visibilityCondition =  <VisibilityFormWidget> json.visibilityCondition;
             this._value = this.parseValue(json);
+            if(this.visibilityCondition){
+                this.isVisible = this.visibilityService.getVisiblityForForm(this.form, this.visibilityCondition);
+            }
+            console.log("element : "+ this.name+ " is Visible? : "+this.isVisible);
             this.updateForm();
         }
     }
@@ -408,3 +424,5 @@ export class FormModel {
         }
     }
 }
+
+
