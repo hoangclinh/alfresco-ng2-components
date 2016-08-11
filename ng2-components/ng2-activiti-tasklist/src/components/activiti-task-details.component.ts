@@ -111,4 +111,8 @@ export class ActivitiTaskDetails implements OnInit {
             }
         );
     }
+
+    hasForm(): boolean {
+        return this.taskDetails.formKey ? true : false;
+    }
 }

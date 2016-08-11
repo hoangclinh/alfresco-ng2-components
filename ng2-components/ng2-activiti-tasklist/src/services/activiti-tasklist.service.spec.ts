@@ -22,7 +22,6 @@ import { HTTP_PROVIDERS } from '@angular/http';
 import { TaskDetailsModel } from '../models/task-details.model';
 import { Comment } from '../models/comment.model';
 
-declare let AlfrescoApi: any;
 declare let jasmine: any;
 
 describe('ActivitiTaskListService', () => {

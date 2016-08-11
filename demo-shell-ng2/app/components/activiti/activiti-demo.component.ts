@@ -45,20 +45,7 @@ export class ActivitiDemoComponent implements OnInit, AfterViewChecked {
 
     taskFilter: any;
 
-    setChoice($event) {
-        this.currentChoice = $event.target.value;
-    }
-
-    isProcessListSelected() {
-        return this.currentChoice === 'process-list';
-    }
-
-    isTaskListSelected() {
-        return this.currentChoice === 'task-list';
-    }
-
     constructor() {
-        console.log('Activiti demo component');
         this.schemaColumn = [
             {type: 'text', key: 'name', title: 'Name', cssClass: 'full-width name-column', sortable: true}
             // {type: 'text', key: 'created', title: 'Created', sortable: true}

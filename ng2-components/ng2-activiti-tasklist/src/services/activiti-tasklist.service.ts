@@ -16,7 +16,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import { AlfrescoSettingsService } from 'ng2-alfresco-core';
+import { AlfrescoSettingsService, AlfrescoAuthenticationService } from 'ng2-alfresco-core';
 import { Http, Headers, RequestOptions, Response } from '@angular/http';
 import { Observable } from 'rxjs/Rx';
 import { FilterModel } from '../models/filter.model';
@@ -29,7 +29,9 @@ import { TaskDetailsModel } from '../models/task-details.model';
 @Injectable()
 export class ActivitiTaskListService {
 
-    constructor(private http: Http, public alfrescoSettingsService: AlfrescoSettingsService) {
+    constructor(private http: Http,
+                private authService: AlfrescoAuthenticationService,
+                public alfrescoSettingsService: AlfrescoSettingsService) {
     }
 
     /**
@@ -160,11 +162,7 @@ export class ActivitiTaskListService {
     private callApiTasksFiltered(filter: FilterParamsModel) {
         let data = JSON.stringify(filter);
         let url = this.alfrescoSettingsService.getBPMApiBaseUrl() + `/api/enterprise/tasks/query`;
-        let headers = new Headers({
-            'Content-Type': 'application/json',
-            'Cache-Control': 'no-cache'
-        });
-        let options = new RequestOptions({headers: headers});
+        let options = this.getRequestOptions();
 
         return this.http
             .post(url, data, options).toPromise();
@@ -172,11 +170,7 @@ export class ActivitiTaskListService {
 
     private callApiTaskFilters() {
         let url = this.alfrescoSettingsService.getBPMApiBaseUrl() + `/api/enterprise/filters/tasks`;
-        let headers = new Headers({
-            'Content-Type': 'application/json',
-            'Cache-Control': 'no-cache'
-        });
-        let options = new RequestOptions({headers: headers});
+        let options = this.getRequestOptions();
 
         return this.http
             .get(url, options).toPromise();
@@ -184,11 +178,7 @@ export class ActivitiTaskListService {
 
     private callApiTaskDetails(id: string) {
         let url = this.alfrescoSettingsService.getBPMApiBaseUrl() + `/api/enterprise/tasks/${id}`;
-        let headers = new Headers({
-            'Content-Type': 'application/json',
-            'Cache-Control': 'no-cache'
-        });
-        let options = new RequestOptions({headers: headers});
+        let options = this.getRequestOptions();
 
         return this.http
             .get(url, options).toPromise();
@@ -196,11 +186,7 @@ export class ActivitiTaskListService {
 
     private callApiTaskComments(id: string) {
         let url = this.alfrescoSettingsService.getBPMApiBaseUrl() + `/api/enterprise/tasks/${id}/comments`;
-        let headers = new Headers({
-            'Content-Type': 'application/json',
-            'Cache-Control': 'no-cache'
-        });
-        let options = new RequestOptions({headers: headers});
+        let options = this.getRequestOptions();
 
         return this.http
             .get(url, options).toPromise();
@@ -208,12 +194,8 @@ export class ActivitiTaskListService {
 
     private callApiAddTaskComment(id: string, message: string) {
         let url = this.alfrescoSettingsService.getBPMApiBaseUrl() + `/api/enterprise/tasks/${id}/comments`;
-        let headers = new Headers({
-            'Content-Type': 'application/json',
-            'Cache-Control': 'no-cache'
-        });
+        let options = this.getRequestOptions();
         let body = JSON.stringify({message: message});
-        let options = new RequestOptions({headers: headers});
 
         return this.http
             .post(url, body, options).toPromise();
@@ -221,12 +203,8 @@ export class ActivitiTaskListService {
 
     private callApiAddTask(task: TaskDetailsModel) {
         let url = this.alfrescoSettingsService.getBPMApiBaseUrl() + `/api/enterprise/tasks/${task.parentTaskId}/checklist`;
-        let headers = new Headers({
-            'Content-Type': 'application/json',
-            'Cache-Control': 'no-cache'
-        });
+        let options = this.getRequestOptions();
         let body = JSON.stringify(task);
-        let options = new RequestOptions({headers: headers});
 
         return this.http
             .post(url, body, options).toPromise();
@@ -234,11 +212,7 @@ export class ActivitiTaskListService {
 
     private callApiTaskChecklist(id: string) {
         let url = this.alfrescoSettingsService.getBPMApiBaseUrl() + `/api/enterprise/tasks/${id}/checklist`;
-        let headers = new Headers({
-            'Content-Type': 'application/json',
-            'Cache-Control': 'no-cache'
-        });
-        let options = new RequestOptions({headers: headers});
+        let options = this.getRequestOptions();
 
         return this.http
             .get(url, options).toPromise();
@@ -246,16 +220,25 @@ export class ActivitiTaskListService {
 
     private callApiCompleteTask(id: string) {
         let url = this.alfrescoSettingsService.getBPMApiBaseUrl() + `/api/enterprise/tasks/${id}/action/complete`;
-        let headers = new Headers({
-            'Content-Type': 'application/json',
-            'Cache-Control': 'no-cache'
-        });
-        let options = new RequestOptions({headers: headers});
+        let options = this.getRequestOptions();
+        let body = JSON.stringify(id);
 
         return this.http
-            .put(url, options).toPromise();
+            .put(url, body, options).toPromise();
     }
 
+    private getHeaders(): Headers {
+        return new Headers({
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': this.authService.getTicket('BPM')
+        });
+    }
+
+    private getRequestOptions(): RequestOptions {
+        let headers = this.getHeaders();
+        return new RequestOptions({ headers: headers });
+    }
 
     /**
      * The method write the error in the console browser

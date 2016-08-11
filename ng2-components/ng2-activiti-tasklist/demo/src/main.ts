@@ -15,45 +15,72 @@
  * limitations under the License.
  */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { HTTP_PROVIDERS } from '@angular/http';
 import { ALFRESCO_CORE_PROVIDERS, AlfrescoAuthenticationService, AlfrescoSettingsService } from 'ng2-alfresco-core';
 import { bootstrap } from '@angular/platform-browser-dynamic';
-import { ActivitiTaskList } from 'ng2-activiti-tasklist';
-import { ObjectDataTableAdapter, ObjectDataColumn } from 'ng2-alfresco-datatable';
+import { ALFRESCO_TASKLIST_DIRECTIVES } from 'ng2-activiti-tasklist';
 
 declare let AlfrescoApi: any;
 
 @Component({
     selector: 'activiti-tasklist-demo',
     template: `
-        <activiti-tasklist [data]="data"></activiti-tasklist>
+    <div *ngIf="isLoggedIn">
+        <span>Task Filters</span>
+        <activiti-filters (filterClick)="onFilterClick($event)"></activiti-filters>
+        <span>Tasks</span>
+        <activiti-tasklist [taskFilter]="taskFilter" [schemaColumn]="schemaColumn"
+                                           (rowClick)="onRowClick($event)" #activititasklist></activiti-tasklist>
+        <span>Task Details</span>
+       <activiti-task-details [taskId]="currentTaskId" #activitidetails></activiti-task-details>
+    </div>
     `,
     styles: [
         ':host > .container {padding: 10px}',
         '.p-10 { padding: 10px; }'
     ],
-    directives: [ActivitiTaskList],
+    directives: [ALFRESCO_TASKLIST_DIRECTIVES],
     providers: [AlfrescoAuthenticationService]
 })
-class ActivitiTaskListDemo implements OnInit {
-    data: ObjectDataTableAdapter;
+class ActivitiTaskListDemo {
+    @ViewChild('activitidetails')
+    activitidetails: any;
 
-    constructor(private setting: AlfrescoSettingsService) {
+    @ViewChild('activititasklist')
+    activititasklist: any;
+
+    currentTaskId: string;
+
+    schemaColumn: any [] = [];
+
+    taskFilter: any;
+
+    isLoggedIn: boolean = false;
+
+    constructor(private setting: AlfrescoSettingsService,
+                private auth: AlfrescoAuthenticationService) {
         this.setting.setProviders(['BPM']);
-        this.data = new ObjectDataTableAdapter([], []);
-    }
-
-    ngOnInit() {
-        let schema = [
-            {type: 'text', key: 'id', title: 'Id'},
-            {type: 'text', key: 'name', title: 'Name', cssClass: 'full-width name-column', sortable: true},
-            {type: 'text', key: 'formKey', title: 'Form Key', sortable: true},
-            {type: 'text', key: 'created', title: 'Created', sortable: true}
+        this.auth.login('admin', 'admin', this.setting.getProviders()).subscribe(
+            () => {
+                this.isLoggedIn = true;
+            }
+        );
+        this.schemaColumn = [
+            {type: 'text', key: 'name', title: 'Name', cssClass: 'full-width name-column', sortable: true}
+            // {type: 'text', key: 'created', title: 'Created', sortable: true}
         ];
 
-        let columns = schema.map(col => new ObjectDataColumn(col));
-        this.data.setColumns(columns);
+    }
+
+    onFilterClick(event: any) {
+        this.taskFilter = event;
+        this.activititasklist.load(this.taskFilter);
+    }
+
+    onRowClick(taskId) {
+        this.currentTaskId = taskId;
+        this.activitidetails.loadDetails(this.currentTaskId);
     }
 
 }
