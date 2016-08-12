@@ -91,11 +91,16 @@ export class UploadService {
         filesToUpload.forEach((uploadingFileModel: FileModel) => {
             uploadingFileModel.setUploading();
 
+            let _filesUploadObserverProgressBar = this.filesUploadObserverProgressBar;
+            let _queue = this.queue;
+
             let promiseUpload = this.authService.getAlfrescoApi().
                 upload.uploadFile(uploadingFileModel.file, directory)
                 .on('progress', (progress: any) => {
                     uploadingFileModel.setProgres(progress);
-                    this.updateFileListStream(this.queue);
+                    if (_filesUploadObserverProgressBar) {
+                        _filesUploadObserverProgressBar.next(_queue);
+                    }
                 })
                 .on('abort', () => {
                     uploadingFileModel.setAbort();
@@ -119,9 +124,11 @@ export class UploadService {
                         data.response
                     );
 
-                    this.updateFileListStream(this.queue);
+                    _filesUploadObserverProgressBar.next(_queue);
                     if (!uploadingFileModel.abort && !uploadingFileModel.error) {
-                        this.updateFileCounterStream(++this.totalCompleted);
+                        if (this.totalCompletedObserver) {
+                            this.totalCompletedObserver.next(++this.totalCompleted);
+                        }
                     }
                 });
 
@@ -174,17 +181,5 @@ export class UploadService {
         // instead of just logging it to the console
         console.error(error);
         return Observable.throw(error || 'Server error');
-    }
-
-    private updateFileListStream(fileList: FileModel[]) {
-        if (this.filesUploadObserverProgressBar) {
-            this.filesUploadObserverProgressBar.next(fileList);
-        }
-    }
-
-    private updateFileCounterStream(total: number) {
-        if (this.totalCompletedObserver) {
-            this.totalCompletedObserver.next(total);
-        }
     }
 }

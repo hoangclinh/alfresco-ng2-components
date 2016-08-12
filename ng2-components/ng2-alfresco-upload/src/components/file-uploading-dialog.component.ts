@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { Component, ChangeDetectorRef, OnInit, OnDestroy } from '@angular/core';
+import { Component, ChangeDetectorRef, OnInit } from '@angular/core';
 import { FileModel } from '../models/file.model';
 import { FileUploadingListComponent } from './file-uploading-list.component';
 import { AlfrescoTranslationService, AlfrescoPipeTranslate } from 'ng2-alfresco-core';
@@ -43,7 +43,7 @@ declare let __moduleName: string;
     host: {'[class.dialog-show]': 'toggleShowDialog'},
     pipes: [AlfrescoPipeTranslate]
 })
-export class FileUploadingDialogComponent implements OnInit, OnDestroy {
+export class FileUploadingDialogComponent implements OnInit {
 
     isDialogActive: boolean = false;
 
@@ -89,9 +89,5 @@ export class FileUploadingDialogComponent implements OnInit, OnDestroy {
      */
     toggleDialogMinimize() {
         this._isDialogMinimized = !this._isDialogMinimized;
-    }
-
-    ngOnDestroy() {
-        this.cd.detach();
     }
 }
