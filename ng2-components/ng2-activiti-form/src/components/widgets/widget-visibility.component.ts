@@ -15,13 +15,38 @@
  * limitations under the License.
  */
 
-import { FormModel } from './widget.model';
-import { VisibilityFormWidget } from './widget-visibility.model';
 
+import { FormModel, ContainerModel, ContainerColumnModel, FormFieldModel  } from './widget.model';
+import { VisibilityFormWidget } from './widget-visibility.model';
 
 export class VisibilityCheckForm {
 
-    public getVisiblityForForm(form: FormModel,visibilityObj: VisibilityFormWidget): boolean {
+
+    public updateVisibilityForForm(form: FormModel) {
+     if(form.fields.length >0){
+           form.fields
+                       .map(
+                             contModel =>
+                             contModel.columns
+                              .map(
+                                  contColModel =>
+                                  contColModel
+                                   .fields.map(
+                                    field =>
+                                        this.refreshVisibilityForField(field) )
+                                  )
+                            );
+       }
+    }
+
+    public refreshVisibilityForField(field: FormFieldModel){
+        if(field.visibilityCondition){
+            field.isVisible = this.getVisiblityForField(field.form, field.visibilityCondition);
+        }
+        console.log("element : "+ field.name+ " is Visible? : "+field.isVisible);
+    }
+
+    public getVisiblityForField(form: FormModel,visibilityObj: VisibilityFormWidget): boolean {
         let isLeftFieldPresent = visibilityObj.leftFormFieldId || visibilityObj.leftRestResponseId
         if(!isLeftFieldPresent){
             return true;
@@ -42,38 +67,38 @@ export class VisibilityCheckForm {
     }
 
     public getLeftValue(form: FormModel, visibilityObj: VisibilityFormWidget): any{
-        if(visibilityObj.leftFormFieldId){
-            let leftValue = this.getFormValueByName(form, visibilityObj.leftFormFieldId);
-            return leftValue;
-        }else{
-           return visibilityObj.leftRestResponseId;
-        }
+        let fieldNameToFind = visibilityObj.leftFormFieldId  ||  visibilityObj.leftRestResponseId;
+        return this.getValueOField(form, fieldNameToFind);
     }
 
-    private getRightValue(form: FormModel,visibilityObj: VisibilityFormWidget): any{
-        if(visibilityObj.rightFormFieldId){
-            let leftValue = this.getFormValueByName(form, visibilityObj.rightFormFieldId);
-            return leftValue;
-        }else if(visibilityObj.rightValue){
+    public getRightValue(form: FormModel, visibilityObj: VisibilityFormWidget): any{
+        let fieldNameToFind = visibilityObj.rightFormFieldId  ||  visibilityObj.rightRestResponseId;
+        let valueFound = this.getValueOField(form, fieldNameToFind);
+        if(!valueFound){
             return visibilityObj.rightValue;
-        }else{
-           return visibilityObj.rightRestResponseId;
         }
+        return valueFound;
     }
 
-    private getFormValueByName(form: FormModel, fieldName : string):  any {
-         let firstFieldLength = Object.keys(form.json.fields).length;
-         for (var i = 0; i < firstFieldLength; i++){
-            let secondFieldLength = Object.keys(form.json.fields[i].fields).length;
-             for( var j = 1; j <= secondFieldLength; j++){
-                let res = form.json.fields[i].fields[j].find(field => field.id ===fieldName);
-                if(res)
-                    return res.value;
-             }
-         }
-         return null;
+    public getValueOField(form: FormModel, field: string): any{
+            let value = form.values[field]?
+                                    form.values[field]:
+                                    this.getFormValueByName(form,field);
+            return value;
     }
 
+    private getFormValueByName(form: FormModel, name: string): any{
+       let firstFieldLength = Object.keys(form.json.fields).length;
+       for (var i = 0; i < firstFieldLength; i++){
+          let secondFieldLength = Object.keys(form.json.fields[i].fields).length;
+           for( var j = 1; j <= secondFieldLength; j++){
+              let res = form.json.fields[i].fields[j].find(field => field.id ===name);
+              if(res)
+                  return res.value;
+           }
+       }
+       return null;
+    }
 
     private evaluateCondition(leftValue: string, rightValue: string, operator: string): boolean{
         switch(operator) {
@@ -83,6 +108,12 @@ export class VisibilityCheckForm {
                 return leftValue < rightValue;
             case "!=":
                 return leftValue !== rightValue;
+            case ">":
+                return leftValue > rightValue;
+            case ">=":
+                return leftValue >= rightValue;
+            case "<=":
+                return leftValue <= rightValue;
         };
     }
 

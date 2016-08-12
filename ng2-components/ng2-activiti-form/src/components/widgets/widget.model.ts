@@ -126,11 +126,10 @@ export class FormFieldModel extends FormWidgetModel {
             this.hyperlinkUrl = json.hyperlinkUrl;
             this.displayText = json.displayText;
             this.visibilityCondition =  <VisibilityFormWidget> json.visibilityCondition;
-            this._value = this.parseValue(json);
             if(this.visibilityCondition){
-                this.isVisible = this.visibilityService.getVisiblityForForm(this.form, this.visibilityCondition);
+                this.isVisible = this.visibilityService.getVisiblityForField(this.form, this.visibilityCondition);
             }
-            console.log("element : "+ this.name+ " is Visible? : "+this.isVisible);
+            this._value = this.parseValue(json);
             this.updateForm();
         }
     }
@@ -195,6 +194,7 @@ export class FormFieldModel extends FormWidgetModel {
         } else {
             this.form.values[this.id] = this.value;
         }
+      this.visibilityService.updateVisibilityForForm(this.form);
     }
 }
 

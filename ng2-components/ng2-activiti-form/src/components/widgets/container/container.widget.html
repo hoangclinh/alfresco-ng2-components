@@ -15,7 +15,7 @@
         <div *ngFor="let col of content.columns" class="mdl-cell mdl-cell--{{col.size}}-col">
             <div class="mdl-grid" *ngIf="col.hasFields()">
                 <div *ngFor="let field of col.fields" class="mdl-cell mdl-cell--12-col">
-                    <div [ngSwitch]="field.type">
+                    <div [ngSwitch]="field.type" [hidden]="!field.isVisible">
                         <div *ngSwitchCase="'integer'">
                             <number-widget [field]="field"></number-widget>
                         </div>
