@@ -78,10 +78,10 @@ the number and the type of the columns that you want show
 Example:
 ```json
 [
- {type: 'text', key: 'id', title: 'Id'},
- {type: 'text', key: 'name', title: 'Name', cssClass: 'full-width name-column', sortable: true},
- {type: 'text', key: 'formKey', title: 'Form Key', sortable: true},
- {type: 'text', key: 'created', title: 'Created', sortable: true}
+ {"type": "text", "key": "id", "title": "Id"},
+ {"type": "text", "key": "name", "title": "Name", "cssClass": "full-width name-column", "sortable": true},
+ {"type": "text", "key": "formKey", "title: "Form Key", "sortable": true},
+ {"type": "text", "key": "created", "title": "Created", "sortable": true}
 ]
 ```
 
